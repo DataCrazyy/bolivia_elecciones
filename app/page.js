@@ -24,7 +24,7 @@ const headerStyle = {
   borderBottom: '1px solid #dee2e6',
   marginBottom: '20px',
   backgroundColor: '#f8f9fa',
-  position: 'relative', // Necesario para la barra tricolor
+  position: 'relative',
 };
 
 const tricolorBarStyle = {
@@ -107,15 +107,16 @@ export default function Home() {
     <main>
       <header style={headerStyle}>
         <div style={tricolorBarStyle}>
-          <div style={{ flex: 1, backgroundColor: '#d92121' }}></div> {/* Rojo */}
-          <div style={{ flex: 1, backgroundColor: '#f2c500' }}></div> {/* Amarillo */}
-          <div style={{ flex: 1, backgroundColor: '#34C759' }}></div> {/* Verde */}
+          <div style={{ flex: 1, backgroundColor: '#d92121' }}></div>
+          <div style={{ flex: 1, backgroundColor: '#f2c500' }}></div>
+          <div style={{ flex: 1, backgroundColor: '#34C759' }}></div>
         </div>
 
         <div className="header-content" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="title-container">
             <h1 style={titleStyle}>Bolivia Decide</h1>
-            <p style={sloganStyle}>"Tu opinión cuenta. Y ahora, se muestra."</p>
+            {/* ✅ LÍNEA CORREGIDA PARA EL DEPLOY */}
+            <p style={sloganStyle}>{`"Tu opinión cuenta. Y ahora, se muestra."`}</p>
           </div>
           <div className="share-button-container">
             <button 
@@ -128,7 +129,6 @@ export default function Home() {
         </div>
       </header>
       
-      {/* El resto de la página no cambia */}
       <div style={{ padding: '0 20px', maxWidth: '1200px', margin: '0 auto' }}>
         <NationalResultsBar nationalResults={nationalResults} />
       </div>
@@ -142,7 +142,6 @@ export default function Home() {
       />
       {showShareModal && <ShareModal closeModal={() => setShowShareModal(false)} />}
 
-      {/* ✅ CSS para el diseño responsivo del encabezado */}
       <style jsx>{`
         .header-content {
           display: flex;
@@ -157,18 +156,17 @@ export default function Home() {
         
         @media (max-width: 640px) {
           .header-content {
-            flex-direction: column; /* Apila los elementos verticalmente */
-            justify-content: center;
+            flex-direction: column;
             gap: 15px;
           }
         }
       `}</style>
+
+      <footer>
+        <p style={{textAlign: 'center', fontSize: '12px', color: '#888', padding: '20px'}}>
+          <strong>Aviso de Privacidad:</strong> Al votar, se registra de forma anónima tu tipo de dispositivo y red para fines estadísticos y para asegurar la integridad de la encuesta. No se almacena información personal identificable.
+        </p>
+      </footer>
     </main>
   );
 }
-// En app/page.js, al final del return, dentro de <main>
-<footer>
-  <p style={{textAlign: 'center', fontSize: '12px', color: '#888', padding: '20px'}}>
-    <strong>Aviso de Privacidad:</strong> Al votar, se registra de forma anónima tu tipo de dispositivo y red para fines estadísticos y para asegurar la integridad de la encuesta. No se almacena información personal identificable.
-  </p>
-</footer>

@@ -10,12 +10,12 @@ export const CANDIDATES = {
     nombre: 'Jorge Quiroga', 
     partido: 'LIBRE 21', 
     color: '#d92121',
-    image: '/candidates/jorge_tuto_quiroga.jpg' 
+    image: '/candidates/jorge_quiroga.jpg' 
   },
   andronico_rodriguez: { 
     nombre: 'Andrónico Rodríguez', 
     partido: 'MOVIMIENTO AL SOCIALISMO',
-    color: '#34C759',
+    color: '#007AFF',
     image: '/candidates/andronico_rodriguez.jpg' 
   },
   manfred_reyes_villa: {
@@ -33,13 +33,13 @@ export const CANDIDATES = {
   jhonny_fernandez: {
     nombre: 'Jhonny Fernández',
     partido: 'UNIDAD CÍVICA SOLIDARIDAD',
-    color: '#5AC8FA',
+    color: '#34C759',
     image: '/candidates/jhonny_fernandez.jpg'
   },
   eduardo_del_castillo: {
     nombre: 'Eduardo Del Castillo',
     partido: 'GOBIERNO EN ACCIÓN',
-    color: '#007AFF',
+    color: '#5AC8FA',
     image: '/candidates/eduardo_del_castillo.jpg'
   },
   eva_copa_murga: {
@@ -48,11 +48,11 @@ export const CANDIDATES = {
     color: '#AF52DE',
     image: '/candidates/eva_copa_murga.jpg'
   },
-  fidel_tapia_zambrama: {
-    nombre: 'Fidel Tapia Zambrana',
+  fidel_yapu_zambrama: {
+    nombre: 'Fidel Yapu Zambrana',
     partido: 'ACCIÓN DEMOCRÁTICA NACIONALISTA',
     color: '#8E8E93',
-    image: '/candidates/fidel_tapia_zambrama.jpg'
+    image: '/candidates/fidel_yapu_zambrama.jpg'
   },
   paulo_c_rodriguez: {
     nombre: 'Paulo C. Rodríguez',

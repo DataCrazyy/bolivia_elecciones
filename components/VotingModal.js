@@ -1,6 +1,7 @@
 // components/VotingModal.js
 'use client';
 import { CANDIDATES } from '../config/candidates';
+import Image from 'next/image'; // ✅ Importamos el componente Image
 
 // --- Estilos ---
 const modalOverlayStyle = {
@@ -37,8 +38,6 @@ const candidateCardStyle = {
   backgroundColor: '#f9f9f9',
 };
 const candidateImageStyle = {
-  width: '80px',
-  height: '80px',
   borderRadius: '50%',
   objectFit: 'cover',
   border: '3px solid #eee',
@@ -56,7 +55,6 @@ const candidatePartyStyle = {
   marginTop: '4px'
 };
 
-
 // --- Componente ---
 export default function VotingModal({ municipio, handleVote, closeModal }) {
   if (!municipio) return null;
@@ -66,7 +64,6 @@ export default function VotingModal({ municipio, handleVote, closeModal }) {
       <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
         <button style={closeButtonStyle} onClick={closeModal}>&times;</button>
         
-        {/* ✅ TEXTO MODIFICADO */}
         <h2 style={{ margin: '0 0 5px 0', color: '#212529' }}>Elecciones Presidenciales 2025</h2>
         <p style={{ margin: 0, color: '#6c757d' }}>
           Tu voto se registrará desde: <strong>{municipio.nombre_municipio}</strong>
@@ -88,7 +85,14 @@ export default function VotingModal({ municipio, handleVote, closeModal }) {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              <img src={data.image} alt={data.nombre} style={candidateImageStyle} />
+              {/* ✅ Reemplazamos <img> por <Image> para optimización */}
+              <Image 
+                src={data.image} 
+                alt={data.nombre} 
+                width={80} 
+                height={80} 
+                style={candidateImageStyle} 
+              />
               <div style={candidateNameStyle}>{data.nombre}</div>
               <div style={candidatePartyStyle}>{data.partido}</div>
             </div>
