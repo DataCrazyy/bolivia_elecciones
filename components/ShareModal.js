@@ -25,7 +25,7 @@ const shareButtonStyle = {
 export default function ShareModal({ closeModal }) {
     const shareText = "¡Ya participé en el mapa electoral de #BoliviaDecide! Mira los resultados en tiempo real y suma tu voz: ";
     // ⬇️ ¡IMPORTANTE! Cambia esto por tu URL real cuando publiques el proyecto
-    const shareUrl = "https://bolivia-decide-app.vercel.app/"; // URL de ejemplo
+    const shareUrl = "https://bolivia-elecciones.vercel.app/"; // URL de ejemplo
 
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;

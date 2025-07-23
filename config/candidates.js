@@ -44,15 +44,15 @@ export const CANDIDATES = {
   },
   eva_copa_murga: {
     nombre: 'Eva Copa Murga',
-    partido: 'JALLALLA LA PAZ',
+    partido: 'MORENA',
     color: '#AF52DE',
     image: '/candidates/eva_copa_murga.jpg'
   },
-  fidel_yapu_zambrama: {
-    nombre: 'Fidel Yapu Zambrana',
+  fidel_tapia_zambrama: {
+    nombre: 'Fidel Tapia Zambrana',
     partido: 'ACCIÓN DEMOCRÁTICA NACIONALISTA',
     color: '#8E8E93',
-    image: '/candidates/fidel_yapu_zambrama.jpg'
+    image: '/candidates/fidel_tapia_zambrama.jpg'
   },
   paulo_c_rodriguez: {
     nombre: 'Paulo C. Rodríguez',
