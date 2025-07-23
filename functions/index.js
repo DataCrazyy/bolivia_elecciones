@@ -2,11 +2,15 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const cors = require("cors")({origin: true});
+const axios = require("axios");
 
 admin.initializeApp();
 const db = admin.firestore();
 
-// Lista de IDs de candidatos para la inicialización correcta
+// ⬇️ ¡MUY IMPORTANTE! ⬇️
+// Pega aquí tu "Clave SECRETA" de reCAPTCHA.
+const RECAPTCHA_SECRET_KEY = 'Pega-aqui-tu-CLAVE-SECRETA';
+
 const CANDIDATE_IDS = [
   'samuel_doria_medina', 'jorge_quiroga', 'andronico_rodriguez', 
   'manfred_reyes_villa', 'rodrigo_paz_pereira', 'jhonny_fernandez',
@@ -21,27 +25,37 @@ exports.registrarVoto = functions.https.onRequest((request, response) => {
         return response.status(403).send("Forbidden!");
       }
       
-      // Ya no se recibe el recaptchaToken
-      const {municipioId, candidateId, voterToken} = request.body;
-      if (!municipioId || !candidateId || !voterToken) {
+      const {municipioId, candidateId, voterToken, recaptchaToken} = request.body;
+      if (!municipioId || !candidateId || !voterToken || !recaptchaToken) {
         return response.status(400).send("Faltan datos en la solicitud.");
+      }
+
+      const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`;
+      
+      const recaptchaResponse = await axios.post(verificationUrl);
+      const { success, score } = recaptchaResponse.data;
+
+      if (!success || score < 0.5) {
+        functions.logger.warn("Verificación reCAPTCHA fallida:", {score});
+        return response.status(403).send("Verificación fallida. Se ha detectado comportamiento de bot.");
       }
       
       const ip = request.headers["x-forwarded-for"] || request.socket.remoteAddress;
       const userAgent = request.headers["user-agent"] || "unknown";
-      
-      // La huella digital ahora se basa solo en el token único
+      const fingerprint = `${ip}_${voterToken}`;
+
       const logRef = db.collection("log_votos_ip");
+      const veinticuatroHorasAtras = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-      // VALIDACIÓN CLAVE: Buscar si el TOKEN único del navegador ya votó.
-      const votoExistenteQuery = logRef.where("voterToken", "==", voterToken);
-      const votoExistenteSnapshot = await votoExistenteQuery.get();
+      const votoExistente = await logRef
+          .where("fingerprint", "==", fingerprint)
+          .where("timestamp", ">", veinticuatroHorasAtras)
+          .get();
 
-      if (!votoExistenteSnapshot.empty) {
-        return response.status(429).send("Este navegador ya ha emitido un voto.");
+      if (!votoExistente.empty) {
+        return response.status(429).send("Este navegador ya ha votado recientemente.");
       }
 
-      // --- Si la validación pasa, se registra el voto ---
       const municipioRef = db.collection("votos_por_municipio").doc(String(municipioId));
       const newLogRef = db.collection("log_votos_ip").doc();
 
@@ -59,15 +73,14 @@ exports.registrarVoto = functions.https.onRequest((request, response) => {
             });
         }
         transaction.set(newLogRef, {
-          voterToken, ip, userAgent, municipioId, candidateId,
+          fingerprint, voterToken, ip, userAgent, municipioId, candidateId,
           timestamp: new Date(),
         });
       });
 
       return response.status(200).send({success: true});
 
-    } catch (error)
-    {
+    } catch (error) {
       functions.logger.error("Error catastrófico en registrarVoto:", error);
       return response.status(500).send("Error interno del servidor.");
     }
