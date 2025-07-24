@@ -23,7 +23,9 @@ const markerStyle = {
 };
 
 export default function BoliviaMap() {
-    const [viewState, setViewState] = useState({ longitude: -64.5, latitude: -16.5, zoom: 4 });
+    // ✅ 1. CAMBIA ESTE VALOR para el zoom inicial
+    const [viewState, setViewState] = useState({ longitude: -64.5, latitude: -16.5, zoom: 4.5 });
+    
     const [hoverInfo, setHoverInfo] = useState(null);
     const [selectedMunicipio, setSelectedMunicipio] = useState(null);
     const [voteData, setVoteData] = useState({});
@@ -32,6 +34,7 @@ export default function BoliviaMap() {
     const [showShareModal, setShowShareModal] = useState(false);
     const [locationAllowed, setLocationAllowed] = useState(true);
     const effectRan = useRef(false);
+    const [isLegendExpanded, setIsLegendExpanded] = useState(false);
 
     useEffect(() => {
         if (effectRan.current && process.env.NODE_ENV === 'development') return;
@@ -78,10 +81,8 @@ export default function BoliviaMap() {
         return () => unsub();
     }, []);
 
-    // ✅ LÓGICA RESTAURADA PARA COLOREAR EL MAPA
     const municipiosPaintStyle = useMemo(() => {
         if (Object.keys(voteData).length === 0) return { 'fill-color': '#d3d3d3', 'fill-opacity': 0.5 };
-        
         const paintExpression = ['match', ['get', 'codigo_ine']];
         for (const [municipioId, data] of Object.entries(voteData)) {
             let winner = 'default';
@@ -98,19 +99,15 @@ export default function BoliviaMap() {
             paintExpression.push(String(municipioId), color);
         }
         paintExpression.push('#d3d3d3');
-        
         return { 'fill-color': paintExpression, 'fill-opacity': 0.7 };
     }, [voteData]);
 
     const handleVote = async (candidateId) => {
-        if (localStorage.getItem('boliviaDecideVoted')) {
-            return;
-        }
+        if (localStorage.getItem('boliviaDecideVoted')) return;
         if (!selectedMunicipio) return;
         
         const loadingToast = toast.loading('Registrando tu voto...');
         const municipioRef = doc(db, "votos_por_municipio", String(selectedMunicipio.codigo_ine));
-        
         let voterToken = localStorage.getItem('voterToken');
         if (!voterToken) {
             voterToken = crypto.randomUUID();
@@ -126,27 +123,23 @@ export default function BoliviaMap() {
                 });
             } else {
                 const initialVotes = { votos_totales: 1 };
-                Object.keys(CANDIDATES).forEach(id => {
-                    initialVotes[`votos_${id}`] = 0;
-                });
+                Object.keys(CANDIDATES).forEach(id => { initialVotes[`votos_${id}`] = 0; });
                 initialVotes[`votos_${candidateId}`] = 1;
                 await setDoc(municipioRef, initialVotes);
             }
-            
             const logRef = doc(db, "log_votos", voterToken);
             await setDoc(logRef, {
-                voterToken: voterToken,
-                userAgent: navigator.userAgent,
+                voterToken, userAgent: navigator.userAgent,
                 municipioId: selectedMunicipio.codigo_ine,
-                candidateId: candidateId,
-                timestamp: new Date(),
+                candidateId, timestamp: new Date(),
             });
 
             localStorage.setItem('boliviaDecideVoted', 'true');
             toast.success('✅ ¡Gracias! Tu voto ha sido registrado.', { id: loadingToast });
             setSelectedMunicipio(null);
             setShowShareModal(true);
-            setViewState({ longitude: -64.5, latitude: -16.5, zoom: 4 });
+            // ✅ Y asegúrate de que este valor coincida con el de arriba
+            setViewState({ longitude: -64.5, latitude: -16.5, zoom: 4.5 });
 
         } catch (error) {
             console.error("Error al registrar el voto:", error);
@@ -156,15 +149,14 @@ export default function BoliviaMap() {
     };
 
     const onClick = (event) => {
-        if (localStorage.getItem('boliviaDecideVoted')) {
-            return;
-        }
+        if (localStorage.getItem('boliviaDecideVoted')) return;
         if (!locationAllowed) {
             toast.error("Para votar, debes habilitar el permiso de ubicación y recargar la página.");
             return;
         }
         const feature = event.features && event.features[0];
         if (feature) {
+            setIsLegendExpanded(false);
             setSelectedMunicipio({ codigo_ine: feature.properties.codigo_ine, nombre_municipio: feature.properties.nombre });
         }
     };
@@ -193,7 +185,9 @@ export default function BoliviaMap() {
                 interactiveLayerIds={['municipios-data']}
                 onClick={onClick}
                 onMouseMove={onHover}
-                minZoom={3}
+                // ✅ 2. CAMBIA ESTE VALOR para el límite de alejamiento manual
+                minZoom={4.5}
+                // ✅ 3. Se ha quitado la restricción de bordes
             >
                 <NavigationControl position="top-left" />
                 {geojson && (
@@ -208,7 +202,7 @@ export default function BoliviaMap() {
                     </Marker>
                 )}
             </Map>
-            <MapLegend />
+            <MapLegend isExpanded={isLegendExpanded} setIsExpanded={setIsLegendExpanded} />
             <HoverTooltip hoverInfo={hoverInfo} />
             <VotingModal municipio={selectedMunicipio} handleVote={handleVote} closeModal={() => setSelectedMunicipio(null)} />
             {showShareModal && <ShareModal closeModal={() => setShowShareModal(false)} />}
