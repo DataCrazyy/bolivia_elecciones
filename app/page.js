@@ -24,7 +24,7 @@ const headerStyle = {
   borderBottom: '1px solid #dee2e6',
   marginBottom: '20px',
   backgroundColor: '#f8f9fa',
-  position: 'relative',
+  position: 'relative', // Necesario para la barra tricolor
 };
 
 const tricolorBarStyle = {
@@ -106,17 +106,21 @@ export default function Home() {
   return (
     <main>
       <header style={headerStyle}>
-        <div style={tricolorBarStyle}>
+        <div style={tricolorBarStyle} className="tricolor-bar">
           <div style={{ flex: 1, backgroundColor: '#d92121' }}></div>
           <div style={{ flex: 1, backgroundColor: '#f2c500' }}></div>
           <div style={{ flex: 1, backgroundColor: '#34C759' }}></div>
         </div>
-
-        <div className="header-content" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        
+        {/* ✅ ESTRUCTURA SIMPLIFICADA PARA EVITAR ERRORES */}
+        <div className="header-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
           <div className="title-container">
-            <h1 style={titleStyle}>Bolivia Decide</h1>
-            {/* ✅ LÍNEA CORREGIDA PARA EL DEPLOY */}
-            <p style={sloganStyle}>{`"Tu opinión cuenta. Y ahora, se muestra."`}</p>
+            <h1 style={titleStyle} className="main-title">
+              Bolivia Decide
+            </h1>
+            <p style={sloganStyle} className="slogan">
+              {`"Tu opinión cuenta. Y ahora, se muestra."`}
+            </p>
           </div>
           <div className="share-button-container">
             <button 
@@ -148,7 +152,6 @@ export default function Home() {
           justify-content: space-between;
           align-items: center;
           gap: 20px;
-          padding: 0 20px;
         }
         .title-container {
           flex-grow: 1;
@@ -158,6 +161,15 @@ export default function Home() {
           .header-content {
             flex-direction: column;
             gap: 15px;
+          }
+          .tricolor-bar {
+            height: 4px !important;
+          }
+          .main-title {
+            font-size: 1.8rem !important;
+          }
+          .slogan {
+            font-size: 1rem !important;
           }
         }
       `}</style>

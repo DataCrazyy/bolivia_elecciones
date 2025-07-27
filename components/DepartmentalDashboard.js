@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { CANDIDATES } from '../config/candidates';
+import Image from 'next/image';
 
 // --- Estilos ---
 const dashboardStyle = {
@@ -34,9 +35,8 @@ const selectStyle = {
 
 const resultsContainerStyle = {
   display: 'grid',
-  // Se ajusta el número de columnas según el espacio disponible
   gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-  gap: '30px 20px', // Espacio vertical y horizontal
+  gap: '30px 20px',
 };
 
 const candidateWrapperStyle = {
@@ -55,13 +55,12 @@ const imageStyle = {
   boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
 };
 
-// ✅ Contenedor para el texto que asegura una altura fija
 const textContainerStyle = {
   marginTop: '10px',
-  height: '60px', // Altura fija para alinear todo
+  height: '60px',
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'space-between', // Distribuye el espacio
+  justifyContent: 'space-between',
 };
 
 const nameStyle = {
@@ -80,28 +79,33 @@ const percentageStyle = (color) => ({
 
 // --- Componente ---
 export default function DepartmentalDashboard({ allDepartments, departmentalData, nationalData }) {
-  const [selectedDept, setSelectedDept] = useState('');
+  // ✅ 1. El estado ahora inicia en "NIVEL NACIONAL" por defecto.
+  const [selectedDept, setSelectedDept] = useState('NIVEL NACIONAL');
 
   useEffect(() => {
-    if (allDepartments.length > 1) {
-      setSelectedDept(allDepartments.find(dept => dept !== 'NIVEL NACIONAL') || '');
+    // Si la lista de departamentos cambia y el seleccionado no está, se reajusta.
+    if (allDepartments.length > 0 && !allDepartments.includes(selectedDept)) {
+      setSelectedDept('NIVEL NACIONAL');
     }
   }, [allDepartments]);
 
   const calculatePercentage = (votes, total) => (total > 0 ? (votes / total) * 100 : 0);
   
-  const departmentsOnly = allDepartments.filter(dept => dept !== 'NIVEL NACIONAL');
-
-  const dataToShow = departmentalData[selectedDept];
-  const totalVotes = dataToShow?.votos_totales;
+  // ✅ 2. Lógica unificada para seleccionar los datos a mostrar.
+  const isNationalView = selectedDept === 'NIVEL NACIONAL';
+  const dataToShow = isNationalView ? nationalData : departmentalData[selectedDept];
+  const totalVotes = isNationalView ? nationalData.grandTotal : dataToShow?.votos_totales;
 
   const candidateResults = dataToShow
     ? Object.keys(CANDIDATES)
-        .map(id => ({
-          id: id,
-          ...CANDIDATES[id],
-          percentage: calculatePercentage(dataToShow[`votos_${id}`], totalVotes),
-        }))
+        .map(id => {
+          const votes = isNationalView ? dataToShow[`votos_${id}`] : dataToShow[`votos_${id}`];
+          return {
+            id: id,
+            ...CANDIDATES[id],
+            percentage: calculatePercentage(votes || 0, totalVotes || 0),
+          };
+        })
         .sort((a, b) => b.percentage - a.percentage)
     : [];
 
@@ -109,20 +113,30 @@ export default function DepartmentalDashboard({ allDepartments, departmentalData
     <div style={dashboardStyle}>
       <h2 style={headerStyle}>Análisis por Región</h2>
 
-      <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)} style={selectStyle}>
-        {departmentsOnly.map(dept => (
+      <select
+        value={selectedDept}
+        onChange={(e) => setSelectedDept(e.target.value)}
+        style={selectStyle}
+      >
+        {/* ✅ 3. Aseguramos que "NIVEL NACIONAL" esté siempre en la lista del filtro. */}
+        {allDepartments.map(dept => (
           <option key={dept} value={dept}>
             {dept}
           </option>
         ))}
       </select>
       
-      {candidateResults.length > 0 ? (
+      {candidateResults.length > 0 && totalVotes > 0 ? (
         <div style={resultsContainerStyle}>
           {candidateResults.map(candidate => (
             <div key={candidate.id} style={candidateWrapperStyle}>
-              <img src={candidate.image} alt={candidate.nombre} style={imageStyle} />
-              {/* ✅ Contenedor de texto aplicado aquí */}
+              <Image 
+                src={candidate.image} 
+                alt={candidate.nombre}
+                width={80}
+                height={80}
+                style={imageStyle} 
+              />
               <div style={textContainerStyle}>
                 <div style={nameStyle}>{candidate.nombre}</div>
                 <div style={percentageStyle(candidate.color)}>{candidate.percentage.toFixed(1)}%</div>

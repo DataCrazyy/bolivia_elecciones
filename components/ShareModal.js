@@ -13,6 +13,8 @@ const modalContentStyle = {
 const closeButtonStyle = {
   background: 'transparent', border: 'none', position: 'absolute',
   top: '10px', right: '15px', fontSize: '24px', cursor: 'pointer',
+  // ✅ Color oscuro para el botón de cerrar
+  color: '#888',
 };
 const shareButtonStyle = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -24,8 +26,8 @@ const shareButtonStyle = {
 
 export default function ShareModal({ closeModal }) {
     const shareText = "¡Ya participé en el mapa electoral de #BoliviaDecide! Mira los resultados en tiempo real y suma tu voz: ";
-    // ⬇️ ¡IMPORTANTE! Cambia esto por tu URL real cuando publiques el proyecto
-    const shareUrl = "https://bolivia-elecciones.vercel.app/"; // URL de ejemplo
+    // ⬇️ ¡IMPORTANTE! Cambia esto por tu URL real de Vercel
+    const shareUrl = "https://bolivia-decide-app.vercel.app/"; // URL de ejemplo
 
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
@@ -35,8 +37,11 @@ export default function ShareModal({ closeModal }) {
         <div style={modalOverlayStyle} onClick={closeModal}>
             <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
                 <button style={closeButtonStyle} onClick={closeModal}>&times;</button>
-                <h2 style={{marginTop: '10px'}}>¡Gracias por Votar!</h2>
-                <p>Tu voz es importante. ¡Ayuda a que otros participen!</p>
+                
+                {/* ✅ CORRECCIÓN: Se añadió un color de texto oscuro */}
+                <h2 style={{marginTop: '10px', color: '#333'}}>¡Gracias por Votar!</h2>
+                <p style={{color: '#555'}}>Tu voz es importante. ¡Ayuda a que otros participen!</p>
+                
                 <div>
                     <a href={twitterUrl} target="_blank" rel="noopener noreferrer" style={{ ...shareButtonStyle, backgroundColor: '#1DA1F2' }}>Compartir en X (Twitter)</a>
                     <a href={facebookUrl} target="_blank" rel="noopener noreferrer" style={{ ...shareButtonStyle, backgroundColor: '#1877F2' }}>Compartir en Facebook</a>
