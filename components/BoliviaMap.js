@@ -36,7 +36,7 @@ const locationBannerStyle = {
     boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
 };
 
-export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visitorId, setFingerprintStatus }) {
+export default function BoliviaMap({ geojson, voteData, user }) {
   const [viewState, setViewState] = useState({ longitude: -64.5, latitude: -16.5, zoom: 4.5 });
   const [hoverInfo, setHoverInfo] = useState(null);
   const [selectedMunicipio, setSelectedMunicipio] = useState(null);
@@ -45,40 +45,66 @@ export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visit
   const [locationAllowed, setLocationAllowed] = useState(true);
   const [isLegendExpanded, setIsLegendExpanded] = useState(false);
   const [lockedMunicipio, setLockedMunicipio] = useState(null);
-  const effectRan = useRef(false);
+  const [hasVoted, setHasVoted] = useState(false);
+  
+  // This ref ensures the check only runs once per user session.
+  const userCheckRef = useRef(null);
 
-  // ✅ CORRECCIÓN: La lógica de geolocalización ahora se activa de forma fiable.
   useEffect(() => {
-    if (fingerprintStatus === 'allowed' && geojson && !effectRan.current) {
-      effectRan.current = true;
-      toast('📍 Obteniendo tu ubicación...');
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocationAllowed(true);
-          const coords = [position.coords.longitude, position.coords.latitude];
-          setUserLocation(coords);
-          setViewState(prev => ({ ...prev, longitude: coords[0], latitude: coords[1], zoom: 9 }));
-          
-          let found = false;
-          for (const feature of geojson.features) {
-            if (feature.geometry && turf.booleanPointInPolygon(turf.point(coords), feature.geometry)) {
-              const municipioData = { codigo_ine: feature.properties.codigo_ine, nombre_municipio: feature.properties.nombre };
-              toast.success(`Ubicación encontrada: ${feature.properties.nombre}.`);
-              setSelectedMunicipio(municipioData);
-              setLockedMunicipio(municipioData);
-              found = true;
-              break;
+    const checkVoteAndGetLocation = async (currentUser) => {
+      toast.loading('Verificando estado de votación...', { id: 'vote-check' });
+      
+      const logRef = doc(db, "log_votos", currentUser.uid);
+      const docSnap = await getDoc(logRef);
+
+      if (docSnap.exists()) {
+        setHasVoted(true);
+        toast.success('Ya has votado. Modo de solo lectura.', { id: 'vote-check' });
+      } else {
+        setHasVoted(false);
+        toast.success('¡Listo para votar!', { id: 'vote-check' });
+
+        toast('📍 Obteniendo tu ubicación...');
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLocationAllowed(true);
+            const coords = [position.coords.longitude, position.coords.latitude];
+            setUserLocation(coords);
+            setViewState(prev => ({ ...prev, longitude: coords[0], latitude: coords[1], zoom: 9 }));
+            
+            let found = false;
+            for (const feature of geojson.features) {
+              if (feature.geometry && turf.booleanPointInPolygon(turf.point(coords), feature.geometry)) {
+                const municipioData = { codigo_ine: feature.properties.codigo_ine, nombre_municipio: feature.properties.nombre };
+                toast.success(`Ubicación encontrada: ${feature.properties.nombre}.`);
+                setSelectedMunicipio(municipioData);
+                setLockedMunicipio(municipioData);
+                found = true;
+                break;
+              }
             }
+            if (!found) toast.error("No se pudo identificar tu municipio. Por favor, haz clic en el mapa para votar.");
+          },
+          () => {
+            setLocationAllowed(false);
+            toast.error("Permiso de ubicación denegado.");
           }
-          if (!found) toast.error("No se pudo identificar tu municipio. Por favor, haz clic en el mapa para votar.");
-        },
-        () => {
-          setLocationAllowed(false);
-          toast.error("Permiso de ubicación denegado.");
-        }
-      );
+        );
+      }
+    };
+
+    // ✅ DEFINITIVE FIX: This logic ensures the check runs exactly once when a new user logs in.
+    if (user && geojson && user.uid !== userCheckRef.current) {
+      userCheckRef.current = user.uid; // Mark this user as checked.
+      checkVoteAndGetLocation(user);
+    } else if (!user) {
+      // If the user logs out, reset everything for the next login.
+      userCheckRef.current = null;
+      setLockedMunicipio(null);
+      setSelectedMunicipio(null);
+      setHasVoted(false);
     }
-  }, [geojson, fingerprintStatus]);
+  }, [user, geojson]);
 
   const municipiosPaintStyle = useMemo(() => {
     if (Object.keys(voteData).length === 0) {
@@ -104,8 +130,8 @@ export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visit
   }, [voteData]);
 
   const handleVote = async (candidateId) => {
-    if (fingerprintStatus !== 'allowed') {
-        toast.error('Este dispositivo ya ha registrado un voto.');
+    if (!user || hasVoted) {
+        toast.error('No puedes votar en este momento.');
         return;
     }
     if (!lockedMunicipio) {
@@ -115,12 +141,12 @@ export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visit
     
     const loadingToast = toast.loading('Registrando tu voto...');
     const municipioRef = doc(db, "votos_por_municipio", String(lockedMunicipio.codigo_ine));
-    const logRef = doc(db, "log_votos", visitorId);
+    const logRef = doc(db, "log_votos", user.uid);
 
     try {
         await setDoc(logRef, {
-            fingerprint: visitorId,
-            userAgent: navigator.userAgent,
+            userId: user.uid,
+            userEmail: user.email,
             municipioId: lockedMunicipio.codigo_ine,
             candidateId,
             timestamp: new Date(),
@@ -140,8 +166,7 @@ export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visit
             await setDoc(municipioRef, initialVotes);
         }
         
-        localStorage.setItem('boliviaDecideVoted', 'true');
-        setFingerprintStatus('denied');
+        setHasVoted(true);
         toast.success('✅ ¡Gracias! Tu voto ha sido registrado.', { id: loadingToast });
         setSelectedMunicipio(null);
         setShowVoteShareModal(true);
@@ -155,11 +180,8 @@ export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visit
   };
 
   const onClick = (event) => {
-    if (fingerprintStatus === 'denied') return;
-    if (fingerprintStatus === 'checking') {
-        toast.loading('Verificando dispositivo...', { id: 'fingerprint-toast' });
-        return;
-    }
+    if (!user || hasVoted) return;
+
     if (!locationAllowed) {
         toast.error("Para votar, debes habilitar el permiso de ubicación y recargar la página.");
         return;
@@ -198,12 +220,7 @@ export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visit
 
   return (
     <div style={{ width: '100%', height: '80vh', position: 'relative', borderRadius: '8px', overflow: 'hidden' }}>
-        {fingerprintStatus === 'denied' && (
-             <div style={{...loaderStyle, position: 'absolute', zIndex: 10, backgroundColor: 'rgba(240, 242, 245, 0.8)'}}>
-                Este dispositivo ya ha registrado un voto. Solo puedes explorar los resultados.
-            </div>
-        )}
-        {!locationAllowed && fingerprintStatus === 'allowed' && (
+        {!locationAllowed && user && !hasVoted && (
             <div style={locationBannerStyle}>
                 <strong>Permiso de Ubicación Denegado.</strong> Para poder votar, por favor habilita el acceso a la ubicación en tu navegador y recarga la página.
             </div>
