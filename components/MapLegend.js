@@ -22,7 +22,6 @@ const legendTitleStyle = {
     margin: '0 0 10px 0',
     fontWeight: 'bold',
     textAlign: 'center',
-    // ✅ Se añade color de texto para asegurar la visibilidad
     color: '#333',
 };
 
@@ -30,7 +29,6 @@ const legendItemStyle = {
     display: 'flex',
     alignItems: 'center',
     marginBottom: '5px',
-    // ✅ Se añade color de texto para asegurar la visibilidad
     color: '#333',
 };
 

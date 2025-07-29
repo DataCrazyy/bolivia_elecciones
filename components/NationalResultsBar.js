@@ -1,13 +1,29 @@
-// components/NationalResultsBar.js
 'use client';
 import { CANDIDATES } from '../config/candidates';
 
 export default function NationalResultsBar({ nationalResults }) {
   const { totalVotes, percentages } = nationalResults;
 
-  // 1. Si no hay votos, no se muestra nada.
+  // 1. Si no hay votos, muestra una barra indicando que se esperan votos.
   if (totalVotes === 0) {
-    return null; // Devuelve null para no renderizar nada en la página.
+    return (
+        <div style={{
+            display: 'flex',
+            width: '100%',
+            height: '35px',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            margin: '20px 0',
+            backgroundColor: '#e9ecef', // Fondo base
+            color: '#6c757d',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '14px',
+            fontWeight: 'bold',
+        }}>
+            Esperando los primeros votos...
+        </div>
+    );
   }
 
   // Umbral para agrupar candidatos en "Otros"
@@ -39,7 +55,8 @@ export default function NationalResultsBar({ nationalResults }) {
       overflow: 'hidden',
       margin: '20px 0',
       border: '1px solid #ddd',
-      backgroundColor: '#e9ecef'
+      // ✅ CORRECCIÓN: Se asegura un fondo blanco para evitar el modo oscuro.
+      backgroundColor: '#ffffff' 
     }}>
       {displaySegments.map((segment) => {
         const isOther = segment.id === 'otros';
@@ -60,8 +77,8 @@ export default function NationalResultsBar({ nationalResults }) {
             overflow: 'hidden',
             transition: 'width 0.5s ease-in-out',
             whiteSpace: 'nowrap',
-            minWidth: 'fit-content', // Se ajusta al contenido si es posible
-            padding: '0 5px' // Añade un pequeño espacio interno
+            minWidth: 'fit-content',
+            padding: '0 5px'
           }}>
             <span>
               { // Lógica de visualización mejorada

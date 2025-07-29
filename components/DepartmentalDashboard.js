@@ -1,4 +1,6 @@
 
+// components/DepartmentalDashboard.js
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -12,8 +14,8 @@ const containerStyle = {
     padding: '20px',
     fontFamily: 'sans-serif',
     // ✅ CORRECCIÓN: Se añade un fondo blanco para evitar el modo oscuro.
-    backgroundColor: '#fff',
-    borderRadius: '8px', // Opcional: para que coincida con el estilo del mapa
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
 };
 
 const headerStyle = {
@@ -28,7 +30,8 @@ const selectStyle = {
     border: '1px solid #ccc',
     minWidth: '300px',
     marginBottom: '20px',
-    // ✅ Se añade color de texto para asegurar la visibilidad
+    // ✅ Se asegura que el fondo y el texto sean visibles
+    backgroundColor: '#ffffff',
     color: '#333',
 };
 
