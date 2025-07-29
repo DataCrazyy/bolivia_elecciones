@@ -1,3 +1,5 @@
+// app/page.js
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -185,7 +187,6 @@ export default function Home() {
           <div className="header-content" style={headerContentStyle}>
             <div style={titleContainerStyle}>
               <h1 className="main-title" style={titleStyle}>Bolivia Decide</h1>
-              {/* ✅ CORRECCIÓN: Se usan llaves y comillas invertidas para evitar el error */}
               <p className="slogan" style={sloganStyle}>{`"Tu opinión cuenta. Y ahora, se muestra."`}</p>
             </div>
             <div className="share-button-container">

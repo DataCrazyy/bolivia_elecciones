@@ -1,7 +1,9 @@
+
+// components/Auth.js
 'use client';
 
-import React, { useEffect } from 'react';
-import { GoogleAuthProvider, signInWithRedirect, signOut, getRedirectResult } from 'firebase/auth';
+import React from 'react';
+import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import toast from 'react-hot-toast';
 
@@ -55,30 +57,14 @@ const logoutButtonStyle = {
 };
 
 export default function Auth({ user, setUser }) {
-    
-    // ✅ CORRECCIÓN: Se usa `signInWithRedirect` para evitar problemas con popups.
     const handleLogin = async () => {
         const provider = new GoogleAuthProvider();
-        await signInWithRedirect(auth, provider);
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (error) {
+            console.error("Error al iniciar sesión:", error);
+        }
     };
-
-    // ✅ Efecto para manejar el resultado después de la redirección.
-    useEffect(() => {
-        const handleRedirectResult = async () => {
-            try {
-                const result = await getRedirectResult(auth);
-                if (result) {
-                    // El usuario ha iniciado sesión correctamente.
-                    // El listener `onAuthStateChanged` en `page.js` se encargará de actualizar el estado.
-                    toast.success(`¡Bienvenido, ${result.user.displayName}!`);
-                }
-            } catch (error) {
-                console.error("Error al obtener el resultado de la redirección:", error);
-                toast.error("Hubo un problema al iniciar sesión.");
-            }
-        };
-        handleRedirectResult();
-    }, []);
 
     const handleLogout = async () => {
         try {
