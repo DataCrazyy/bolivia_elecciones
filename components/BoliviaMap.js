@@ -39,21 +39,6 @@ const locationBannerStyle = {
     boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
 };
 
-const loaderOverlayStyle = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(240, 242, 245, 0.8)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#666',
-    fontSize: '18px',
-    zIndex: 10,
-};
-
 export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visitorId, setFingerprintStatus }) {
   const [viewState, setViewState] = useState({ longitude: -64.5, latitude: -16.5, zoom: 4.5 });
   const [hoverInfo, setHoverInfo] = useState(null);
@@ -172,7 +157,9 @@ export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visit
   };
 
   const onClick = (event) => {
+    // ✅ CORRECCIÓN: Si el estado es 'denied', simplemente no hace nada.
     if (fingerprintStatus === 'denied') return;
+    
     if (fingerprintStatus === 'checking') {
         toast.loading('Verificando dispositivo...', { id: 'fingerprint-toast' });
         return;
@@ -215,11 +202,6 @@ export default function BoliviaMap({ geojson, voteData, fingerprintStatus, visit
 
   return (
     <div style={{ width: '100%', height: '80vh', position: 'relative', borderRadius: '8px', overflow: 'hidden' }}>
-        {fingerprintStatus === 'denied' && (
-             <div style={loaderOverlayStyle}>
-                Este dispositivo ya ha registrado un voto. Solo puedes explorar los resultados.
-            </div>
-        )}
         {!locationAllowed && fingerprintStatus === 'allowed' && (
             <div style={locationBannerStyle}>
                 <strong>Permiso de Ubicación Denegado.</strong> Para poder votar, por favor habilita el acceso a la ubicación en tu navegador y recarga la página.
