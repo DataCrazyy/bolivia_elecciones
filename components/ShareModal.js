@@ -1,3 +1,4 @@
+
 // components/ShareModal.js
 'use client';
 
@@ -8,12 +9,12 @@ const modalOverlayStyle = {
 };
 const modalContentStyle = {
   background: 'white', padding: '20px 30px 30px 30px', borderRadius: '8px',
-  width: '90%', maxWidth: '400px', textAlign: 'center', position: 'relative'
+  width: '90%', maxWidth: '400px', textAlign: 'center', position: 'relative',
+  boxShadow: '0 5px 25px rgba(0,0,0,0.2)'
 };
 const closeButtonStyle = {
   background: 'transparent', border: 'none', position: 'absolute',
   top: '10px', right: '15px', fontSize: '24px', cursor: 'pointer',
-  // ✅ Color oscuro para el botón de cerrar
   color: '#888',
 };
 const shareButtonStyle = {
@@ -22,30 +23,31 @@ const shareButtonStyle = {
     fontSize: '16px', cursor: 'pointer', borderRadius: '5px',
     border: 'none', color: 'white', textDecoration: 'none',
     fontWeight: 'bold',
+    transition: 'opacity 0.2s',
 };
 
 export default function ShareModal({ closeModal }) {
-    const shareText = "¡Ya participé en el mapa electoral de #BoliviaDecide! Mira los resultados en tiempo real y suma tu voz: ";
-    // ⬇️ ¡IMPORTANTE! Cambia esto por tu URL real de Vercel
-    const shareUrl = "https://bolivia-decide-app.vercel.app/"; // URL de ejemplo
+    const shareText = "¡Ya participé en el mapa electoral de #BoliviaDecide! Mira los resultados en tiempo real y suma tu voz:";
+    
+    // ✅ CORRECCIÓN: Se usa la variable de entorno para la URL.
+    const shareUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + shareUrl)}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
 
     return (
         <div style={modalOverlayStyle} onClick={closeModal}>
             <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
                 <button style={closeButtonStyle} onClick={closeModal}>&times;</button>
                 
-                {/* ✅ CORRECCIÓN: Se añadió un color de texto oscuro */}
                 <h2 style={{marginTop: '10px', color: '#333'}}>¡Gracias por Votar!</h2>
                 <p style={{color: '#555'}}>Tu voz es importante. ¡Ayuda a que otros participen!</p>
                 
                 <div>
-                    <a href={twitterUrl} target="_blank" rel="noopener noreferrer" style={{ ...shareButtonStyle, backgroundColor: '#1DA1F2' }}>Compartir en X (Twitter)</a>
-                    <a href={facebookUrl} target="_blank" rel="noopener noreferrer" style={{ ...shareButtonStyle, backgroundColor: '#1877F2' }}>Compartir en Facebook</a>
-                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" style={{ ...shareButtonStyle, backgroundColor: '#25D366' }}>Compartir en WhatsApp</a>
+                    <a href={twitterUrl} target="_blank" rel="noopener noreferrer" style={{ ...shareButtonStyle, backgroundColor: '#1DA1F2' }} onMouseOver={e=>e.currentTarget.style.opacity=0.9} onMouseOut={e=>e.currentTarget.style.opacity=1}>Compartir en X (Twitter)</a>
+                    <a href={facebookUrl} target="_blank" rel="noopener noreferrer" style={{ ...shareButtonStyle, backgroundColor: '#1877F2' }} onMouseOver={e=>e.currentTarget.style.opacity=0.9} onMouseOut={e=>e.currentTarget.style.opacity=1}>Compartir en Facebook</a>
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" style={{ ...shareButtonStyle, backgroundColor: '#25D366' }} onMouseOver={e=>e.currentTarget.style.opacity=0.9} onMouseOut={e=>e.currentTarget.style.opacity=1}>Compartir en WhatsApp</a>
                 </div>
             </div>
         </div>

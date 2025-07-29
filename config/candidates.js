@@ -44,7 +44,7 @@ export const CANDIDATES = {
   },
   eva_copa_murga: {
     nombre: 'Eva Copa Murga',
-    partido: 'MORENA',
+    partido: 'JALLALLA LP',
     color: '#AF52DE',
     image: '/candidates/eva_copa_murga.jpg'
   },

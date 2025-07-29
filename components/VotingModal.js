@@ -1,9 +1,8 @@
 // components/VotingModal.js
 'use client';
 import { CANDIDATES } from '../config/candidates';
-import Image from 'next/image'; // ✅ Importamos el componente Image
+import Image from 'next/image';
 
-// --- Estilos ---
 const modalOverlayStyle = {
   position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
   backgroundColor: 'rgba(0, 0, 0, 0.7)', display: 'flex',
@@ -55,7 +54,6 @@ const candidatePartyStyle = {
   marginTop: '4px'
 };
 
-// --- Componente ---
 export default function VotingModal({ municipio, handleVote, closeModal }) {
   if (!municipio) return null;
 
@@ -72,30 +70,31 @@ export default function VotingModal({ municipio, handleVote, closeModal }) {
 
         <div style={ballotContainerStyle}>
           {Object.entries(CANDIDATES).map(([id, data]) => (
-            <div
-              key={id}
-              style={candidateCardStyle}
-              onClick={() => handleVote(id)}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = '0px 4px 15px rgba(0,0,0,0.1)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              {/* ✅ Reemplazamos <img> por <Image> para optimización */}
-              <Image 
-                src={data.image} 
-                alt={data.nombre} 
-                width={80} 
-                height={80} 
-                style={candidateImageStyle} 
-              />
-              <div style={candidateNameStyle}>{data.nombre}</div>
-              <div style={candidatePartyStyle}>{data.partido}</div>
-            </div>
+            id !== 'default' && id !== 'tie' && (
+              <div
+                key={id}
+                style={candidateCardStyle}
+                onClick={() => handleVote(id)}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0px 4px 15px rgba(0,0,0,0.1)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <Image 
+                  src={data.image} 
+                  alt={data.nombre} 
+                  width={80} 
+                  height={80} 
+                  style={candidateImageStyle} 
+                />
+                <div style={candidateNameStyle}>{data.nombre}</div>
+                <div style={candidatePartyStyle}>{data.partido}</div>
+              </div>
+            )
           ))}
         </div>
       </div>

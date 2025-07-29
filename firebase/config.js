@@ -1,5 +1,5 @@
 // firebase/config.js
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -11,8 +11,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Inicializar la app de Firebase
-const app = initializeApp(firebaseConfig);
+let app;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps()[0];
+}
 
-// Exportar la instancia de la base de datos Firestore para usarla en otros archivos
-export const db = getFirestore(app);
+const db = getFirestore(app);
+
+export { db };

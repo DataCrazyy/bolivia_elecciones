@@ -1,79 +1,70 @@
+
 // components/MapLegend.js
 'use client';
 import { CANDIDATES } from '../config/candidates';
 
-// --- Estilos ---
 const legendContainerStyle = {
-  position: 'absolute',
-  top: '10px',
-  right: '10px',
-  backgroundColor: 'rgba(255, 255, 255, 0.9)', // Fondo semi-transparente
-  borderRadius: '8px',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-  zIndex: 1,
-  overflow: 'hidden',
-  transition: 'all 0.3s ease-in-out',
-  maxWidth: '220px', // Limita el ancho en pantallas grandes
+    position: 'absolute',
+    bottom: '20px',
+    right: '10px',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    padding: '10px',
+    borderRadius: '8px',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+    zIndex: 1,
+    transition: 'all 0.3s ease-in-out',
+    fontFamily: 'sans-serif',
+    fontSize: '14px',
 };
-
-const buttonStyle = {
-  background: 'transparent',
-  border: 'none',
-  padding: '10px 15px',
-  width: '100%',
-  textAlign: 'left',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  // ✅ SOLUCIÓN: Color de texto oscuro fijo para ser visible en dark mode
-  color: '#333', 
+const legendTitleStyle = {
+    margin: '0 0 10px 0',
+    fontWeight: 'bold',
+    textAlign: 'center',
 };
-
-const contentStyle = (isExpanded) => ({
-  maxHeight: isExpanded ? '300px' : '0px', // Animación de altura
-  overflow: 'auto',
-  transition: 'max-height 0.3s ease-in-out',
-  padding: isExpanded ? '0 15px 15px 15px' : '0 15px',
-});
-
 const legendItemStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  marginTop: '10px',
-  fontSize: '14px',
-  // ✅ SOLUCIÓN: Color de texto oscuro fijo
-  color: '#333', 
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '5px',
+};
+const colorBoxStyle = {
+    width: '18px',
+    height: '18px',
+    marginRight: '8px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+    flexShrink: 0,
+};
+const toggleButtonStyle = {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    color: '#007AFF',
+    padding: '5px 0 0 0',
+    width: '100%',
+    textAlign: 'center',
+    marginTop: '5px'
 };
 
-const colorBoxStyle = (color) => ({
-  width: '18px',
-  height: '18px',
-  backgroundColor: color,
-  marginRight: '10px',
-  borderRadius: '4px',
-  flexShrink: 0, // Evita que el cuadro de color se encoja
-});
-
-// --- Componente ---
 export default function MapLegend({ isExpanded, setIsExpanded }) {
-  return (
-    <div style={legendContainerStyle}>
-      <button style={buttonStyle} onClick={() => setIsExpanded(!isExpanded)}>
-        <span>Leyenda</span>
-        {/* La flecha cambia de dirección */}
-        <span style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
-      </button>
-      <div style={contentStyle(isExpanded)}>
-        {Object.values(CANDIDATES).map(candidate => (
-          <div key={candidate.nombre} style={legendItemStyle}>
-            <div style={colorBoxStyle(candidate.color)}></div>
-            <span>{candidate.nombre}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+    // ✅ CORRECCIÓN: Se filtran los candidatos reales para no mostrar 'default' ni 'tie'
+    const candidatesToShow = Object.entries(CANDIDATES).filter(([id]) => id !== 'default' && id !== 'tie');
+
+    return (
+        <div style={{...legendContainerStyle, maxWidth: isExpanded ? '200px' : '120px'}}>
+            <h4 style={legendTitleStyle}>Leyenda</h4>
+            <div style={{ maxHeight: isExpanded ? '300px' : '0', overflow: 'hidden', transition: 'max-height 0.3s ease-in-out' }}>
+                {candidatesToShow.map(([id, data]) => (
+                    <div key={id} style={legendItemStyle}>
+                        <div style={{ ...colorBoxStyle, backgroundColor: data.color }}></div>
+                        <span>{data.nombre}</span>
+                    </div>
+                ))}
+                {/* ✅ CORRECCIÓN: Se eliminaron las leyendas de "Empate" y "Sin votos" */}
+            </div>
+            <button style={toggleButtonStyle} onClick={() => setIsExpanded(!isExpanded)}>
+                {isExpanded ? 'Ocultar' : 'Mostrar'}
+            </button>
+        </div>
+    );
 }
