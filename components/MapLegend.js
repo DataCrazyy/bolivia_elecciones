@@ -1,6 +1,7 @@
 
 // components/MapLegend.js
 'use client';
+
 import { CANDIDATES } from '../config/candidates';
 
 const legendContainerStyle = {
@@ -16,16 +17,23 @@ const legendContainerStyle = {
     fontFamily: 'sans-serif',
     fontSize: '14px',
 };
+
 const legendTitleStyle = {
     margin: '0 0 10px 0',
     fontWeight: 'bold',
     textAlign: 'center',
+    // ✅ Se añade color de texto para asegurar la visibilidad
+    color: '#333',
 };
+
 const legendItemStyle = {
     display: 'flex',
     alignItems: 'center',
     marginBottom: '5px',
+    // ✅ Se añade color de texto para asegurar la visibilidad
+    color: '#333',
 };
+
 const colorBoxStyle = {
     width: '18px',
     height: '18px',
@@ -34,6 +42,7 @@ const colorBoxStyle = {
     border: '1px solid #ccc',
     flexShrink: 0,
 };
+
 const toggleButtonStyle = {
     background: 'none',
     border: 'none',
@@ -47,7 +56,6 @@ const toggleButtonStyle = {
 };
 
 export default function MapLegend({ isExpanded, setIsExpanded }) {
-    // ✅ CORRECCIÓN: Se filtran los candidatos reales para no mostrar 'default' ni 'tie'
     const candidatesToShow = Object.entries(CANDIDATES).filter(([id]) => id !== 'default' && id !== 'tie');
 
     return (
@@ -60,7 +68,6 @@ export default function MapLegend({ isExpanded, setIsExpanded }) {
                         <span>{data.nombre}</span>
                     </div>
                 ))}
-                {/* ✅ CORRECCIÓN: Se eliminaron las leyendas de "Empate" y "Sin votos" */}
             </div>
             <button style={toggleButtonStyle} onClick={() => setIsExpanded(!isExpanded)}>
                 {isExpanded ? 'Ocultar' : 'Mostrar'}

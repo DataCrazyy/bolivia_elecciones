@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,8 +9,11 @@ import { CANDIDATES } from '../config/candidates';
 const containerStyle = {
     maxWidth: '1200px',
     margin: '40px auto',
-    padding: '0 20px',
+    padding: '20px',
     fontFamily: 'sans-serif',
+    // ✅ CORRECCIÓN: Se añade un fondo blanco para evitar el modo oscuro.
+    backgroundColor: '#fff',
+    borderRadius: '8px', // Opcional: para que coincida con el estilo del mapa
 };
 
 const headerStyle = {
@@ -24,6 +28,8 @@ const selectStyle = {
     border: '1px solid #ccc',
     minWidth: '300px',
     marginBottom: '20px',
+    // ✅ Se añade color de texto para asegurar la visibilidad
+    color: '#333',
 };
 
 const resultsGridStyle = {
@@ -94,7 +100,6 @@ export default function DepartmentalDashboard({ allDepartments, departmentalData
         });
 
         setDisplayData(candidateResults);
-    // ✅ CORRECCIÓN: Se añade `selectedDept` a la lista de dependencias.
     }, [departmentalData, nationalData, selectedDept]);
 
     return (
