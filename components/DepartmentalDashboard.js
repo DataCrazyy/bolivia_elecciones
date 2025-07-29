@@ -1,154 +1,136 @@
-// components/DepartmentalDashboard.js
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CANDIDATES } from '../config/candidates';
 import Image from 'next/image';
+import { CANDIDATES } from '../config/candidates';
 
 // --- Estilos ---
-const dashboardStyle = {
-  padding: '20px',
-  maxWidth: '1200px',
-  margin: '40px auto',
-  backgroundColor: '#f8f9fa',
-  borderRadius: '8px',
-  boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+const containerStyle = {
+    maxWidth: '1200px',
+    margin: '40px auto',
+    padding: '0 20px',
+    fontFamily: 'sans-serif',
 };
 
 const headerStyle = {
-  textAlign: 'center',
-  marginBottom: '20px',
-  color: '#343a40',
+    textAlign: 'center',
+    marginBottom: '30px',
 };
 
 const selectStyle = {
-  display: 'block',
-  width: '100%',
-  maxWidth: '400px',
-  margin: '0 auto 30px auto',
-  padding: '10px',
-  fontSize: '16px',
-  borderRadius: '5px',
-  border: '1px solid #ced4da',
-  backgroundColor: 'white',
+    padding: '10px',
+    fontSize: '16px',
+    borderRadius: '8px',
+    border: '1px solid #ccc',
+    minWidth: '300px',
+    marginBottom: '20px',
 };
 
-const resultsContainerStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-  gap: '30px 20px',
+const resultsGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+    gap: '25px',
+    justifyContent: 'center',
 };
 
-const candidateWrapperStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  textAlign: 'center',
+const candidateCardStyle = {
+    textAlign: 'center',
 };
 
-const imageStyle = {
-  width: '80px',
-  height: '80px',
-  borderRadius: '50%',
-  objectFit: 'cover',
-  border: '3px solid #fff',
-  boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+const imageWrapperStyle = {
+    position: 'relative',
+    width: '100px',
+    height: '100px',
+    margin: '0 auto 10px auto',
 };
 
-const textContainerStyle = {
-  marginTop: '10px',
-  height: '60px',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
+const candidateImageStyle = {
+    borderRadius: '50%',
+    objectFit: 'cover',
+};
+
+const percentageStyle = {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    marginBottom: '5px',
 };
 
 const nameStyle = {
-  fontSize: '14px',
-  fontWeight: '600',
-  color: '#333',
-  lineHeight: '1.2',
+    fontSize: '15px',
+    color: '#333',
+    fontWeight: '500',
 };
 
-const percentageStyle = (color) => ({
-  fontSize: '20px',
-  fontWeight: 'bold',
-  color: color || '#333',
-});
-
+const partyStyle = {
+    fontSize: '12px',
+    color: '#777',
+};
 
 // --- Componente ---
 export default function DepartmentalDashboard({ allDepartments, departmentalData, nationalData }) {
-  // ✅ 1. El estado ahora inicia en "NIVEL NACIONAL" por defecto.
-  const [selectedDept, setSelectedDept] = useState('NIVEL NACIONAL');
+    const [selectedDept, setSelectedDept] = useState('NIVEL NACIONAL');
+    const [displayData, setDisplayData] = useState([]);
 
-  useEffect(() => {
-    // Si la lista de departamentos cambia y el seleccionado no está, se reajusta.
-    if (allDepartments.length > 0 && !allDepartments.includes(selectedDept)) {
-      setSelectedDept('NIVEL NACIONAL');
-    }
-  }, [allDepartments]);
+    useEffect(() => {
+        const dataToProcess = selectedDept === 'NIVEL NACIONAL'
+            ? nationalData
+            : departmentalData[selectedDept];
 
-  const calculatePercentage = (votes, total) => (total > 0 ? (votes / total) * 100 : 0);
-  
-  // ✅ 2. Lógica unificada para seleccionar los datos a mostrar.
-  const isNationalView = selectedDept === 'NIVEL NACIONAL';
-  const dataToShow = isNationalView ? nationalData : departmentalData[selectedDept];
-  const totalVotes = isNationalView ? nationalData.grandTotal : dataToShow?.votos_totales;
+        if (!dataToProcess) {
+            setDisplayData([]);
+            return;
+        }
 
-  const candidateResults = dataToShow
-    ? Object.keys(CANDIDATES)
-        .map(id => {
-          const votes = isNationalView ? dataToShow[`votos_${id}`] : dataToShow[`votos_${id}`];
-          return {
-            id: id,
-            ...CANDIDATES[id],
-            percentage: calculatePercentage(votes || 0, totalVotes || 0),
-          };
-        })
-        .sort((a, b) => b.percentage - a.percentage)
-    : [];
+        const totalVotes = dataToProcess.votos_totales || dataToProcess.grandTotal || 0;
 
-  return (
-    <div style={dashboardStyle}>
-      <h2 style={headerStyle}>Análisis por Región</h2>
+        const candidateResults = Object.entries(CANDIDATES).map(([id, details]) => {
+            const votes = dataToProcess[`votos_${id}`] || 0;
+            const percentage = totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : '0.0';
+            return {
+                id,
+                ...details,
+                percentage,
+            };
+        });
 
-      <select
-        value={selectedDept}
-        onChange={(e) => setSelectedDept(e.target.value)}
-        style={selectStyle}
-      >
-        {/* ✅ 3. Aseguramos que "NIVEL NACIONAL" esté siempre en la lista del filtro. */}
-        {allDepartments.map(dept => (
-          <option key={dept} value={dept}>
-            {dept}
-          </option>
-        ))}
-      </select>
-      
-      {candidateResults.length > 0 && totalVotes > 0 ? (
-        <div style={resultsContainerStyle}>
-          {candidateResults.map(candidate => (
-            <div key={candidate.id} style={candidateWrapperStyle}>
-              <Image 
-                src={candidate.image} 
-                alt={candidate.nombre}
-                width={80}
-                height={80}
-                style={imageStyle} 
-              />
-              <div style={textContainerStyle}>
-                <div style={nameStyle}>{candidate.nombre}</div>
-                <div style={percentageStyle(candidate.color)}>{candidate.percentage.toFixed(1)}%</div>
-              </div>
+        setDisplayData(candidateResults);
+    // ✅ CORRECCIÓN: Se añade `selectedDept` a la lista de dependencias.
+    }, [departmentalData, nationalData, selectedDept]);
+
+    return (
+        <div style={containerStyle}>
+            <div style={headerStyle}>
+                <h2 style={{ fontSize: '2rem', color: '#212529', marginBottom: '10px' }}>Análisis por Región</h2>
+                <select 
+                    value={selectedDept} 
+                    onChange={(e) => setSelectedDept(e.target.value)}
+                    style={selectStyle}
+                >
+                    {allDepartments.map(dept => (
+                        <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                </select>
             </div>
-          ))}
+
+            <div style={resultsGridStyle}>
+                {displayData.map(candidate => (
+                    <div key={candidate.id} style={candidateCardStyle}>
+                        <div style={imageWrapperStyle}>
+                            <Image
+                                src={candidate.image || '/candidates/placeholder.png'}
+                                alt={candidate.nombre}
+                                layout="fill"
+                                style={candidateImageStyle}
+                            />
+                        </div>
+                        <div style={{ ...percentageStyle, color: candidate.color }}>
+                            {candidate.percentage}%
+                        </div>
+                        <div style={nameStyle}>{candidate.nombre}</div>
+                        <div style={partyStyle}>{candidate.partido}</div>
+                    </div>
+                ))}
+            </div>
         </div>
-      ) : (
-        <p style={{ textAlign: 'center', color: '#6c757d', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          No hay votos registrados para esta selección aún.
-        </p>
-      )}
-    </div>
-  );
+    );
 }
